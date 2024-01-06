@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="msapplication-tap-highlight" content="no">
+	<meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+	<meta name="color-scheme" content="light dark">
+	<link rel="stylesheet" href="css/index.css">
+	<title>Hello World</title>
+
+	<script
+		src="https://browser.sentry-cdn.com/7.92.0/bundle.js"
+		integrity="sha384-Nwo9ysc+jSLtb3ia3KbjKm0++29Q9uXd2b3BQg9eZcpbE2r8WgvG1ZtD1exQo5Zo"
+		crossorigin="anonymous"
+	></script>
+	<script src="env.js"></script>
+	<script src="cordova.js"></script>
+	<script>
+		console.log('Initializing Sentry-browser')
+		Sentry.init({
+			dsn         : window.SENTRY_DSN,
+			debug       : true,
+			release     : 'testing',
+			sampleRate  : 1,
+			initialScope: {
+				tags: { logger: 'browser' },
+			},
+		})
+
+		document.addEventListener('deviceready', onDeviceReady, false)
+
+		function onDeviceReady() {
+			// Cordova is now initialized. Have fun!
+			document.getElementById('deviceready').classList.add('ready')
+
+			//TODO comment the lines below to realize Sentry JS will start reporting your messages (but weirdly enough, it won't capture the "undefined SentryCordova" if you then press nativeCrash())
+			console.log('Initializing Sentry-browser')
+			window.SentryCordova = cordova.require('sentry-cordova.Sentry')
+			window.SentryCordova.init({
+				dsn         : window.SENTRY_DSN,
+				debug       : true,
+				release     : 'testing',
+				sampleRate  : 1,
+				initialScope: {
+					tags: { logger: 'browser' },
+				},
+			})
+		}
+
+		function captureMessage() {
+			const eventId = window.Sentry.captureMessage('random message captured '+Math.round(Math.random() * 100000000))
+			window.alert(`The created event is ${eventId}. Check your Network tab in DevTools to discover if it was ever sent or not.`)
+		}
+
+		function nativeCrash() {
+			window.SentryCordova.nativeCrash()
+		}
+
+	</script>
+</head>
+<body>
+<div class="app">
+	<h1>Cordova Sentry<br/>🆚<br/>JS Sentry</h1>
+	<br/>
+	<div id="deviceready" class="blink">
+		<p class="event listening">Connecting to Device</p>
+		<p class="event received">Device is Ready</p>
+	</div>
+	<br/>
+	<button onclick="captureMessage()">Capture a randomized message</button>
+	<button onclick="nativeCrash()">Cause a native error</button>
+</div>
+</body>
+</html>
